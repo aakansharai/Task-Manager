@@ -7,11 +7,16 @@ const getAllTask = async (req, res) => {
 }
 
 const createTask = async (req, res) => {
-    if (!req.body.title || !req.body.title.trim()) {
-        return res.status(400).json({ "error": "Task title is required" });
+    try {
+        if (!req.body.title || !req.body.title.trim()) {
+            return res.status(400).json({ "error": "Task title is required" });
+        }
+        const createNewTask = await pool.query('INSERT INTO tasks (title) VALUES ($1) RETURNING *', [req.body.title]);
+        res.status(201).json(createNewTask.rows[0])
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Internal server error" });
     }
-    const createNewTask = await pool.query('INSERT INTO tasks (title) VALUES ($1) RETURNING *', [req.body.title]);
-    res.status(201).json(createNewTask.rows[0])
 }
 
 const updateTask = async (req, res) => {
@@ -48,6 +53,7 @@ const deleteTask = async (req, res) => {
 }
 
 const tasksByStatus = async (req, res) => {
+    try {
     if (!req.body.status) {
         return res.status(400).json({ "error": "status is required" });
     } else if (req.body.status == "pending" || req.body.status == "completed") {
@@ -55,6 +61,9 @@ const tasksByStatus = async (req, res) => {
         res.status(200).json(tasksByStatus.rows);
     } else {
         return res.status(400).json({ "error": "the status should be either pending or completed" });
+    }} catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Internal server error" });
     }
 }
 
