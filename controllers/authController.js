@@ -8,19 +8,11 @@ const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        if (!name || !email || !password) {
-            res.status(400).json({ message: "Name, email and password is required" });
-        }
-
-        if (password.length < 8) {
-            res.status(400).json({ message: "password must be atleast 8 characters long" })
-        }
         const existUser = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
 
         if (existUser.rows.length > 0) {
             res.status(409).json({ message: "user already exists!" });
         }
-        console.log()
         const passwordHash = await bcrypt.hash(password, 10);
         const newUser = await pool.query(`INSERT INTO users (name, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role_id`, [name, email, passwordHash, 3]);
 

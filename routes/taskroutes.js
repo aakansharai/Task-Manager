@@ -5,27 +5,27 @@ const { getPermission } = require('../controllers/permissionController');
 const { register, login } = require('../controllers/authController')
 const { autharizationToken } = require('../middleware/validateToken')
 const { checkPermission } = require('../middleware/checkpermission');
-const { validateRequest } = require('../middleware/validateRequest');
+const { validateRequest, createATaskValidation, updateTaskValidation, taskByStatusValidation, registerValidator } = require('../middleware/validateRequest');
 const router = express.Router();
 
 
 
 // AUTHERISATION 
-router.post('/auth/register', validateRequest, register);
+router.post('/auth/register', registerValidator, validateRequest, register);
 
 router.post('/auth/login', login);
 
 
-
 router.get('/tasks', autharizationToken, checkPermission("view_task"), getAllTask);
 
-router.post('/tasks/create', autharizationToken, checkPermission("create_task"), createTask);
+router.post('/tasks/create', autharizationToken, checkPermission("create_task"), createATaskValidation, validateRequest, createTask);
 
-router.put('/tasks/:id', autharizationToken, checkPermission("update_task"), updateTask);
+// processing ...
+router.put('/tasks/:id', autharizationToken, checkPermission("update_task"), updateTaskValidation, validateRequest, updateTask);
 
 router.delete('/tasks/delete/:id', autharizationToken, checkPermission("delete_task"), deleteTask);
 
-router.post('/tasks/status', autharizationToken, checkPermission("view_task"), tasksByStatus);
+router.post('/tasks/status', autharizationToken, checkPermission("view_task"), taskByStatusValidation, validateRequest, tasksByStatus);
 
 router.get('/tasks/:id', autharizationToken, checkPermission("view_task"), taskById);
 
